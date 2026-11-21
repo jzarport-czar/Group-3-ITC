@@ -339,3 +339,109 @@ footer {
     margin: 0;
   }
 }
+
+
+/* Header controls and dark-mode button */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.theme-btn {
+  padding: 8px 12px;
+  border: 1px solid #ffffff77;
+  border-radius: 20px;
+  color: white;
+  background: #ffffff18;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.theme-btn:hover {
+  background: #ffffff30;
+}
+
+/* Dark mode */
+body.dark-mode {
+  --ink: #f5f7fa;
+  --muted: #aeb7c5;
+  --line: #343a43;
+  background: #0c0d10;
+  color: var(--ink);
+}
+
+body.dark-mode .stat,
+body.dark-mode .panel,
+body.dark-mode .task {
+  background: #161a20;
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+body.dark-mode .stat strong { color: #f5f7fa; }
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  color: #f5f7fa;
+  background: #1c2027;
+  border-color: #343a43;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder { color: #929baa; }
+
+body.dark-mode .field label { color: #c5ccd6; }
+
+body.dark-mode .icon-btn {
+  color: #f5f7fa;
+  background: #1c2027;
+  border-color: #343a43;
+}
+
+body.dark-mode .icon-btn:hover { background: #292f38; }
+
+body.dark-mode .pill {
+  background: #292f38;
+  color: #d5dbe5;
+}
+
+body.dark-mode .pill.high {
+  background: #492626;
+  color: #ffaaaa;
+}
+
+body.dark-mode .pill.medium {
+  background: #49391f;
+  color: #ffd28a;
+}
+
+body.dark-mode .pill.low,
+body.dark-mode .pill.done {
+  background: #173d2b;
+  color: #8ce0b3;
+}
+
+body.dark-mode .calendar-btn {
+  color: #b9d0ff;
+  background: #1b2b45;
+  border-color: #344b70;
+}
+
+body.dark-mode .calendar-btn:hover { background: #253b5c; }
+
+body.dark-mode .notice {
+  color: #c9d7f3;
+  background: #1b2639;
+  border-color: #344b70;
+}
+
+body.dark-mode footer { color: #8993a3; }
+
+@media (max-width: 760px) {
+  .header-actions { justify-content: flex-start; }
+}

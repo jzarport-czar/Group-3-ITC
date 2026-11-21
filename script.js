@@ -81,6 +81,39 @@ function showTasks() {
   });
 }
 
+// Set priority automatically based on task type
+function setSuggestedPriority() {
+  let type = get("type").value;
+
+  if (type === "Assignment") {
+    get("priority").value = "Low";
+  } else if (type === "Activities") {
+    get("priority").value = "Medium";
+  } else if (type === "Performance Task" || type === "Exam") {
+    get("priority").value = "High";
+  }
+}
+
+get("type").addEventListener("change", setSuggestedPriority);
+
+// Dark mode toggle (remember the choice in this browser)
+function setTheme(isDark) {
+  document.body.classList.toggle("dark-mode", isDark);
+  get("themeToggle").textContent = isDark ? "Light mode" : "Dark mode";
+  get("themeToggle").setAttribute(
+    "aria-label",
+    isDark ? "Switch to light mode" : "Switch to dark mode"
+  );
+  localStorage.setItem("darkMode", isDark ? "on" : "off");
+}
+
+get("themeToggle").addEventListener("click", function() {
+  setTheme(!document.body.classList.contains("dark-mode"));
+});
+
+setTheme(localStorage.getItem("darkMode") === "on");
+setSuggestedPriority();
+
 // Add a new task
 get("taskForm").addEventListener("submit", function(event) {
   event.preventDefault();

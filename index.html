@@ -20,7 +20,10 @@
           />
           <span>Deadline <b>Detective</b></span>
         </div>
-        <div class="tag">Gordon College · BSIT Student Planner</div>
+        <div class="header-actions">
+          <div class="tag">Gordon College · BSIT Student Planner</div>
+          <button id="themeToggle" class="theme-btn" type="button" aria-label="Switch to dark mode">Dark mode</button>
+        </div>
       </div>
     </header>
 
@@ -83,9 +86,11 @@
               <div class="field">
                 <label for="type">Task type</label>
                 <select id="type">
-                  <option>Assignment</option>
-                  <option>Project</option>
+                  <option selected>Assignment</option>
+                  <option>Activities</option>
+                  <option>Performance Task</option>
                   <option>Exam</option>
+                  <option>Project</option>
                   <option>Presentation</option>
                   <option>Other</option>
                 </select>
@@ -100,8 +105,8 @@
                 <label for="priority">Priority</label>
                 <select id="priority">
                   <option>High</option>
-                  <option selected>Medium</option>
-                  <option>Low</option>
+                  <option>Medium</option>
+                  <option selected>Low</option>
                 </select>
               </div>
             </div>
