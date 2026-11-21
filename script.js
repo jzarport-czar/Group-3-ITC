@@ -92,6 +92,9 @@ function setSuggestedPriority() {
   } else if (type === "Performance Task" || type === "Exam") {
     get("priority").value = "High";
   }
+  else if (type === "Project" || type === "Presentation") {
+    get("priority").value = "High";
+  }
 }
 
 get("type").addEventListener("change", setSuggestedPriority);
@@ -169,29 +172,3 @@ function calendarLink(task) {
 
   return link;
 }
-
-// Search and filter tasks
-get("search").addEventListener("input", showTasks);
-get("filter").addEventListener("change", showTasks);
-
-// Start the planner
-get("due").value = getDate(3);
-showTasks();
-
-const loginForm = document.getElementById("loginForm");
-
-loginForm.addEventListener("submit", function(event) {
-
-    event.preventDefault();
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    if (email && password) {
-
-        document.getElementById("message").textContent =
-            "Login form submitted successfully!";
-
-    }
-
-});
