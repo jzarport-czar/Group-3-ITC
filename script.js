@@ -37,11 +37,8 @@ function showTasks() {
   get("doneCount").textContent = completed.length;
   get("completedNavCount").textContent = completed.length;
 
-  let shownTasks = (currentView === "completed" ? completed : tasks.filter(task =>
-    filter === "all" ||
-    (filter === "open" && !task.done) ||
-    (filter === "done" && task.done) ||
-    (filter === "high" && task.priority === "High" && !task.done)
+  let shownTasks = (currentView === "completed" ? completed : unfinished.filter(task =>
+    filter === "all" || (filter === "high" && task.priority === "High")
   )).filter(task =>
     (task.title + task.subject).toLowerCase().includes(search)
   );
@@ -51,7 +48,7 @@ function showTasks() {
   if (shownTasks.length === 0) {
     list.innerHTML = currentView === "completed"
       ? '<p class="empty">No completed tasks yet. Mark a task as complete to see it here.</p>'
-      : '<p class="empty">No tasks found. Add a task to get started.</p>';
+      : '<p class="empty">No active tasks found. Completed tasks are on the Completed tasks page.</p>';
   }
 
   shownTasks.forEach(task => {

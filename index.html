@@ -71,9 +71,7 @@
               aria-label="Search tasks"
             />
             <select id="filter" aria-label="Filter tasks">
-              <option value="all">All tasks</option>
-              <option value="open">Not completed</option>
-              <option value="done">Completed</option>
+              <option value="all">All active tasks</option>
               <option value="high">High priority</option>
             </select>
           </div>
@@ -126,8 +124,8 @@
               </div>
             </div>
             <div class="field">
-              <label for="plannedDate">Planned work date</label>
-              <input id="plannedDate" type="date" />
+              <label for="plannedDate">Planned work date *</label>
+              <input id="plannedDate" type="date" required />
             </div>
             <div class="field">
               <label for="notes">Notes (optional)</label>
