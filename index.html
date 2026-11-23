@@ -22,13 +22,29 @@
         </div>
         <div class="header-actions">
           <div class="tag">Gordon College · BSIT Student Planner</div>
-          <button id="themeToggle" class="theme-btn" type="button" aria-label="Switch to dark mode">Dark mode</button>
         </div>
       </div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button
+          id="menuToggle"
+          class="menu-btn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="navLinks"
+        >
+          Menu
+        </button>
+        <div id="navLinks" class="nav-links">
+          <a class="nav-link active" href="#dashboard">Dashboard</a>
+          <a class="nav-link" href="#tasks">My Tasks</a>
+          <a class="nav-link" href="#add-task">Add Task</a>
+        </div>
+        <button id="themeToggle" class="theme-btn" type="button" aria-label="Switch to dark mode">Dark mode</button>
+      </nav>
     </header>
 
     <main>
-      <section class="stats">
+      <section id="dashboard" class="stats">
         <div class="stat">
           <small>Tasks to finish</small><strong id="totalCount">0</strong>
         </div>
@@ -41,7 +57,7 @@
       </section>
 
       <div class="layout">
-        <section class="panel">
+        <section id="tasks" class="panel">
           <h2>My task list</h2>
           <p class="sub">
             Your tasks are sorted by due date. Search or filter the list
@@ -65,7 +81,7 @@
           <div id="taskList" class="task-list"></div>
         </section>
 
-        <aside class="panel">
+        <aside id="add-task" class="panel">
           <h2>Add a task</h2>
           <p class="sub">Enter your task details and deadline.</p>
           <form id="taskForm">

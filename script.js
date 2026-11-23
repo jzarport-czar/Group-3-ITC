@@ -114,6 +114,24 @@ get("themeToggle").addEventListener("click", function() {
   setTheme(!document.body.classList.contains("dark-mode"));
 });
 
+// Responsive main navigation
+get("menuToggle").addEventListener("click", function() {
+  let links = get("navLinks");
+  let isOpen = links.classList.toggle("open");
+  get("menuToggle").setAttribute("aria-expanded", isOpen ? "true" : "false");
+});
+
+document.querySelectorAll(".nav-link").forEach(function(link) {
+  link.addEventListener("click", function() {
+    document.querySelectorAll(".nav-link").forEach(function(item) {
+      item.classList.remove("active");
+    });
+    link.classList.add("active");
+    get("navLinks").classList.remove("open");
+    get("menuToggle").setAttribute("aria-expanded", "false");
+  });
+});
+
 setTheme(localStorage.getItem("darkMode") === "on");
 setSuggestedPriority();
 
