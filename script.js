@@ -31,9 +31,6 @@ function showTasks() {
   let unfinished = tasks.filter(task => !task.done);
   let completed = tasks.filter(task => task.done);
   get("totalCount").textContent = unfinished.length;
-  get("weekCount").textContent = unfinished.filter(task =>
-    task.due >= getDate(0) && task.due <= getDate(7)
-  ).length;
   get("doneCount").textContent = completed.length;
   get("completedNavCount").textContent = completed.length;
 
