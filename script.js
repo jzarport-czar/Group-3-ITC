@@ -38,12 +38,16 @@ function showTasks() {
   get("completedNavCount").textContent = completed.length;
 
   let shownTasks = (currentView === "completed" ? completed : unfinished.filter(task =>
-    filter === "all" || (filter === "high" && task.priority === "High")
+    filter === "all" || task.priority.toLowerCase() === filter
   )).filter(task =>
     (task.title + task.subject).toLowerCase().includes(search)
   );
 
-  shownTasks.sort((a, b) => a.due.localeCompare(b.due));
+  if (currentView === "active" && get("sort").value === "farthest") {
+    shownTasks.sort((a, b) => b.due.localeCompare(a.due));
+  } else {
+    shownTasks.sort((a, b) => a.due.localeCompare(b.due));
+  }
 
   if (shownTasks.length === 0) {
     list.innerHTML = currentView === "completed"
@@ -125,6 +129,7 @@ get("completedTasksNav").addEventListener("click", function() {
 
 get("search").addEventListener("input", showTasks);
 get("filter").addEventListener("change", showTasks);
+get("sort").addEventListener("change", showTasks);
 
 // Set priority automatically based on task type
 function setSuggestedPriority() {

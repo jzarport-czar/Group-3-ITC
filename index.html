@@ -22,12 +22,6 @@
         </div>
         <div class="header-actions">
           <div class="tag">Gordon College · BSIT Student Planner</div>
-          <a
-            class="theme-btn calendar-home-btn"
-            href="https://calendar.google.com/"
-            target="_blank"
-            rel="noopener"
-          >Open Google Calendar</a>
           <button id="themeToggle" class="theme-btn" type="button" aria-label="Switch to dark mode">Dark mode</button>
         </div>
       </div>
@@ -73,9 +67,21 @@
             <select id="filter" aria-label="Filter tasks">
               <option value="all">All active tasks</option>
               <option value="high">High priority</option>
+              <option value="medium">Medium priority</option>
+              <option value="low">Low priority</option>
+            </select>
+            <select id="sort" aria-label="Sort tasks by due date">
+              <option value="nearest">Nearest due date first</option>
+              <option value="farthest">Farthest due date first</option>
             </select>
           </div>
           <div id="taskList" class="task-list"></div>
+          <a
+            class="calendar-btn task-calendar-home"
+            href="https://calendar.google.com/"
+            target="_blank"
+            rel="noopener"
+          >Open Google Calendar</a>
         </section>
 
         <aside id="addTaskPanel" class="panel">
