@@ -28,6 +28,15 @@
     </header>
 
     <main>
+      <nav class="page-nav" aria-label="Task pages">
+        <button id="activeTasksNav" class="nav-btn active" type="button" aria-current="page">
+          My tasks
+        </button>
+        <button id="completedTasksNav" class="nav-btn" type="button">
+          Completed tasks <span id="completedNavCount">0</span>
+        </button>
+      </nav>
+
       <section class="stats">
         <div class="stat">
           <small>Tasks to finish</small><strong id="totalCount">0</strong>
@@ -41,7 +50,7 @@
       </section>
 
       <div class="layout">
-        <section class="panel">
+        <section id="activeTasksView" class="panel">
           <h2>My task list</h2>
           <p class="sub">
             Your tasks are sorted by due date. Search or filter the list
@@ -65,7 +74,7 @@
           <div id="taskList" class="task-list"></div>
         </section>
 
-        <aside class="panel">
+        <aside id="addTaskPanel" class="panel">
           <h2>Add a task</h2>
           <p class="sub">Enter your task details and deadline.</p>
           <form id="taskForm">
@@ -111,6 +120,10 @@
               </div>
             </div>
             <div class="field">
+              <label for="plannedDate">Planned work date</label>
+              <input id="plannedDate" type="date" />
+            </div>
+            <div class="field">
               <label for="notes">Notes (optional)</label>
               <textarea
                 id="notes"
@@ -128,6 +141,12 @@
           </div>
         </aside>
       </div>
+
+      <section id="completedTasksView" class="panel completed-view" hidden>
+        <h2>Completed tasks</h2>
+        <p class="sub">A record of the tasks you have finished.</p>
+        <div id="completedTaskList" class="task-list"></div>
+      </section>
     </main>
     <footer>
       Your tasks are saved in this browser. Google Calendar events are added

@@ -1,6 +1,7 @@
 // Save tasks in the browser
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let nextId = 1;
+let currentView = "active";
 
 // Get an element by its ID
 function get(id) {
@@ -21,31 +22,36 @@ function saveTasks() {
 
 // Show all tasks
 function showTasks() {
-  let list = get("taskList");
+  let list = get(currentView === "completed" ? "completedTaskList" : "taskList");
   list.innerHTML = "";
 
-  let search = get("search").value.toLowerCase();
+  let search = currentView === "completed" ? "" : get("search").value.toLowerCase();
   let filter = get("filter").value;
 
   let unfinished = tasks.filter(task => !task.done);
+  let completed = tasks.filter(task => task.done);
   get("totalCount").textContent = unfinished.length;
   get("weekCount").textContent = unfinished.filter(task =>
     task.due >= getDate(0) && task.due <= getDate(7)
   ).length;
-  get("doneCount").textContent = tasks.filter(task => task.done).length;
+  get("doneCount").textContent = completed.length;
+  get("completedNavCount").textContent = completed.length;
 
-  let shownTasks = tasks.filter(task =>
-    (task.title + task.subject).toLowerCase().includes(search) &&
-    (filter === "all" ||
-     (filter === "open" && !task.done) ||
-     (filter === "done" && task.done) ||
-     (filter === "high" && task.priority === "High" && !task.done))
+  let shownTasks = (currentView === "completed" ? completed : tasks.filter(task =>
+    filter === "all" ||
+    (filter === "open" && !task.done) ||
+    (filter === "done" && task.done) ||
+    (filter === "high" && task.priority === "High" && !task.done)
+  )).filter(task =>
+    (task.title + task.subject).toLowerCase().includes(search)
   );
 
   shownTasks.sort((a, b) => a.due.localeCompare(b.due));
 
   if (shownTasks.length === 0) {
-    list.innerHTML = '<p class="empty">No tasks found. Add a task to get started.</p>';
+    list.innerHTML = currentView === "completed"
+      ? '<p class="empty">No completed tasks yet. Mark a task as complete to see it here.</p>'
+      : '<p class="empty">No tasks found. Add a task to get started.</p>';
   }
 
   shownTasks.forEach(task => {
@@ -63,8 +69,11 @@ function showTasks() {
           <p>${task.subject || "No subject"} · ${task.type}</p>
         </div>
         <div class="task-actions">
-          <button class="icon-btn" onclick="toggleTask(${task.id})">✓</button>
-          <button class="icon-btn" onclick="deleteTask(${task.id})">×</button>
+          ${task.done
+            ? `<button class="icon-btn" onclick="deleteTask(${task.id})">Remove</button>
+               <button class="icon-btn" onclick="toggleTask(${task.id})">Continue</button>`
+            : `<button class="icon-btn" aria-label="Mark task complete" onclick="toggleTask(${task.id})">✓</button>
+               <button class="icon-btn" aria-label="Delete task" onclick="deleteTask(${task.id})">×</button>`}
         </div>
       </div>
       <div class="task-meta">
@@ -72,6 +81,9 @@ function showTasks() {
           ${task.done ? "Completed" : task.priority + " priority"}
         </span>
         <span class="pill">${dateText}</span>
+        ${task.plannedDate
+          ? `<span class="pill">Plan to work on ${new Date(task.plannedDate + "T12:00:00").toDateString()}</span>`
+          : ""}
       </div>
       ${task.notes ? `<p>${task.notes}</p>` : ""}
       ${!task.done ? `<a class="calendar-btn" target="_blank" rel="noopener" href="${calendarLink(task)}">Add to Google Calendar</a>` : ""}
@@ -80,6 +92,35 @@ function showTasks() {
     list.appendChild(card);
   });
 }
+
+function showView(view) {
+  currentView = view;
+  let completed = view === "completed";
+  get("activeTasksView").hidden = completed;
+  get("addTaskPanel").hidden = completed;
+  get("completedTasksView").hidden = !completed;
+  get("activeTasksNav").classList.toggle("active", !completed);
+  get("completedTasksNav").classList.toggle("active", completed);
+  if (completed) {
+    get("activeTasksNav").removeAttribute("aria-current");
+    get("completedTasksNav").setAttribute("aria-current", "page");
+  } else {
+    get("activeTasksNav").setAttribute("aria-current", "page");
+    get("completedTasksNav").removeAttribute("aria-current");
+  }
+  showTasks();
+}
+
+get("activeTasksNav").addEventListener("click", function() {
+  showView("active");
+});
+
+get("completedTasksNav").addEventListener("click", function() {
+  showView("completed");
+});
+
+get("search").addEventListener("input", showTasks);
+get("filter").addEventListener("change", showTasks);
 
 // Set priority automatically based on task type
 function setSuggestedPriority() {
@@ -127,6 +168,7 @@ get("taskForm").addEventListener("submit", function(event) {
     subject: get("subject").value,
     type: get("type").value,
     due: get("due").value,
+    plannedDate: get("plannedDate").value,
     priority: get("priority").value,
     notes: get("notes").value,
     done: false
@@ -172,3 +214,5 @@ function calendarLink(task) {
 
   return link;
 }
+
+showTasks();
