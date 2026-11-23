@@ -1,185 +1,174 @@
-// Deadline Detective - simple task planner
+// Save tasks in the browser
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let nextId = 1;
 
-const $ = id => document.getElementById(id);
-const STORAGE_KEY = "deadlineDetectiveTasks";
+// Get an element by its ID
+function get(id) {
+  return document.getElementById(id);
+}
 
-function dateAfter(days) {
-  const date = new Date();
+// Make a date a few days from today
+function getDate(days) {
+  let date = new Date();
   date.setDate(date.getDate() + days);
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0")
-  ].join("-");
+  return date.toISOString().split("T")[0];
 }
 
-function loadTasks() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) return JSON.parse(saved);
-
-  return [
-    { id: 1, title: "Finish GEC 01 activity", subject: "Understanding the Self", type: "Assignment", due: dateAfter(2), priority: "High", notes: "Review all five template questions.", done: false },
-    { id: 2, title: "Prepare database project outline", subject: "Programming / IT", type: "Project", due: dateAfter(5), priority: "Medium", notes: "Agree on the project scope with the group.", done: false },
-    { id: 3, title: "Review for quiz", subject: "General Education", type: "Exam", due: dateAfter(1), priority: "High", notes: "Review class notes and examples.", done: false }
-  ];
-}
-
-let tasks = loadTasks();
-let nextId = Math.max(0, ...tasks.map(task => task.id)) + 1;
-
+// Save tasks
 function saveTasks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-function daysUntil(date) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.round((new Date(date + "T00:00:00") - today) / 86400000);
-}
+// Show all tasks
+function showTasks() {
+  let list = get("taskList");
+  list.innerHTML = "";
 
-function formatDate(date) {
-  return new Date(date + "T12:00:00").toLocaleDateString(undefined, {
-    month: "short", day: "numeric", year: "numeric"
-  });
-}
+  let search = get("search").value.toLowerCase();
+  let filter = get("filter").value;
 
-// Escape text before showing it in HTML.
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[char]);
-}
+  let unfinished = tasks.filter(task => !task.done);
+  get("totalCount").textContent = unfinished.length;
+  get("weekCount").textContent = unfinished.filter(task =>
+    task.due >= getDate(0) && task.due <= getDate(7)
+  ).length;
+  get("doneCount").textContent = tasks.filter(task => task.done).length;
 
-// Create a Google Calendar event link for an all-day deadline.
-function googleCalendarLink(task) {
-  const start = task.due.replaceAll("-", "");
-  const endDate = new Date(task.due + "T12:00:00");
-  endDate.setDate(endDate.getDate() + 1);
-  const end = [
-    endDate.getFullYear(),
-    String(endDate.getMonth() + 1).padStart(2, "0"),
-    String(endDate.getDate()).padStart(2, "0")
-  ].join("");
+  let shownTasks = tasks.filter(task =>
+    (task.title + task.subject).toLowerCase().includes(search) &&
+    (filter === "all" ||
+     (filter === "open" && !task.done) ||
+     (filter === "done" && task.done) ||
+     (filter === "high" && task.priority === "High" && !task.done))
+  );
 
-  const details = [
-    task.subject ? "Subject: " + task.subject : "",
-    "Type: " + task.type,
-    "Priority: " + task.priority,
-    task.notes
-  ].filter(Boolean).join("\n");
+  shownTasks.sort((a, b) => a.due.localeCompare(b.due));
 
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: task.title,
-    dates: `${start}/${end}`,
-    details
-  });
-
-  return "https://calendar.google.com/calendar/render?" + params.toString();
-}
-
-function render() {
-  const openTasks = tasks.filter(task => !task.done);
-  $("totalCount").textContent = openTasks.length;
-  $("weekCount").textContent = openTasks.filter(task => {
-    const days = daysUntil(task.due);
-    return days >= 0 && days <= 7;
-  }).length;
-  $("doneCount").textContent = tasks.filter(task => task.done).length;
-
-  const query = $("search").value.toLowerCase();
-  const filter = $("filter").value;
-
-  const visibleTasks = tasks
-    .filter(task => `${task.title} ${task.subject} ${task.type}`.toLowerCase().includes(query))
-    .filter(task => {
-      if (filter === "open") return !task.done;
-      if (filter === "done") return task.done;
-      if (filter === "high") return !task.done && task.priority === "High";
-      return true;
-    })
-    .sort((a, b) => Number(a.done) - Number(b.done) || a.due.localeCompare(b.due));
-
-  $("taskList").innerHTML = "";
-
-  if (!visibleTasks.length) {
-    $("taskList").innerHTML = '<p class="empty">No tasks found. Try another search or add a task.</p>';
-    return;
+  if (shownTasks.length === 0) {
+    list.innerHTML = '<p class="empty">No tasks found. Add a task to get started.</p>';
   }
 
-  visibleTasks.forEach(task => {
-    const days = daysUntil(task.due);
-    let dueLabel = "Due " + formatDate(task.due);
-    if (task.done) dueLabel = "Completed";
-    else if (days < 0) dueLabel = "Overdue";
-    else if (days === 0) dueLabel = "Due today";
-    else if (days === 1) dueLabel = "Due tomorrow";
-
-    const card = document.createElement("article");
+  shownTasks.forEach(task => {
+    let card = document.createElement("article");
     card.className = "task";
+
+    let dateText = task.done ? "Completed" :
+      task.due < getDate(0) ? "Overdue" :
+      "Due " + new Date(task.due + "T12:00:00").toDateString();
+
     card.innerHTML = `
       <div class="task-top">
         <div>
-          <h3>${escapeHTML(task.title)}</h3>
-          <p>${escapeHTML(task.subject || "No subject")} · ${escapeHTML(task.type)}</p>
+          <h3>${task.title}</h3>
+          <p>${task.subject || "No subject"} · ${task.type}</p>
         </div>
         <div class="task-actions">
-          <button class="icon-btn" data-toggle="${task.id}" aria-label="${task.done ? "Mark incomplete" : "Mark completed"}">${task.done ? "↶" : "✓"}</button>
-          <button class="icon-btn" data-delete="${task.id}" aria-label="Delete task">×</button>
+          <button class="icon-btn" onclick="toggleTask(${task.id})">✓</button>
+          <button class="icon-btn" onclick="deleteTask(${task.id})">×</button>
         </div>
       </div>
       <div class="task-meta">
-        <span class="pill ${task.done ? "done" : task.priority.toLowerCase()}">${task.done ? "Completed" : escapeHTML(task.priority) + " priority"}</span>
-        <span class="pill">${dueLabel}</span>
+        <span class="pill ${task.done ? "done" : task.priority.toLowerCase()}">
+          ${task.done ? "Completed" : task.priority + " priority"}
+        </span>
+        <span class="pill">${dateText}</span>
       </div>
-      ${task.notes ? `<p class="task-notes">${escapeHTML(task.notes)}</p>` : ""}
-      ${!task.done ? `<a class="calendar-btn" href="${googleCalendarLink(task)}" target="_blank" rel="noopener">＋ Add to Google Calendar</a>` : ""}
+      ${task.notes ? `<p>${task.notes}</p>` : ""}
+      ${!task.done ? `<a class="calendar-btn" target="_blank" rel="noopener" href="${calendarLink(task)}">Add to Google Calendar</a>` : ""}
     `;
-    $("taskList").appendChild(card);
+
+    list.appendChild(card);
   });
 }
 
-$("taskForm").addEventListener("submit", event => {
+// Set priority automatically based on task type
+function setSuggestedPriority() {
+  let type = get("type").value;
+
+  if (type === "Assignment") {
+    get("priority").value = "Low";
+  } else if (type === "Activities") {
+    get("priority").value = "Medium";
+  } else if (type === "Performance Task" || type === "Exam") {
+    get("priority").value = "High";
+  }
+  else if (type === "Project" || type === "Presentation") {
+    get("priority").value = "High";
+  }
+}
+
+get("type").addEventListener("change", setSuggestedPriority);
+
+// Dark mode toggle (remember the choice in this browser)
+function setTheme(isDark) {
+  document.body.classList.toggle("dark-mode", isDark);
+  get("themeToggle").textContent = isDark ? "Light mode" : "Dark mode";
+  get("themeToggle").setAttribute(
+    "aria-label",
+    isDark ? "Switch to light mode" : "Switch to dark mode"
+  );
+  localStorage.setItem("darkMode", isDark ? "on" : "off");
+}
+
+get("themeToggle").addEventListener("click", function() {
+  setTheme(!document.body.classList.contains("dark-mode"));
+});
+
+setTheme(localStorage.getItem("darkMode") === "on");
+setSuggestedPriority();
+
+// Add a new task
+get("taskForm").addEventListener("submit", function(event) {
   event.preventDefault();
 
   tasks.push({
     id: nextId++,
-    title: $("title").value.trim(),
-    subject: $("subject").value.trim(),
-    type: $("type").value,
-    due: $("due").value,
-    priority: $("priority").value,
-    notes: $("notes").value.trim(),
+    title: get("title").value,
+    subject: get("subject").value,
+    type: get("type").value,
+    due: get("due").value,
+    priority: get("priority").value,
+    notes: get("notes").value,
     done: false
   });
 
   saveTasks();
-  $("taskForm").reset();
-  $("due").value = dateAfter(3);
-  render();
+  get("taskForm").reset();
+  get("due").value = getDate(3);
+  showTasks();
 });
 
-$("taskList").addEventListener("click", event => {
-  const toggleButton = event.target.closest("[data-toggle]");
-  const deleteButton = event.target.closest("[data-delete]");
+// Mark a task as complete
+function toggleTask(id) {
+  let task = tasks.find(task => task.id === id);
+  task.done = !task.done;
+  saveTasks();
+  showTasks();
+}
 
-  if (toggleButton) {
-    const task = tasks.find(item => item.id === Number(toggleButton.dataset.toggle));
-    if (task) task.done = !task.done;
-  }
+// Delete a task
+function deleteTask(id) {
+  tasks = tasks.filter(task => task.id !== id);
+  saveTasks();
+  showTasks();
+}
 
-  if (deleteButton) {
-    tasks = tasks.filter(item => item.id !== Number(deleteButton.dataset.delete));
-  }
+// Make a Google Calendar event link
+function calendarLink(task) {
+  let date = task.due.replaceAll("-", "");
+  let endDate = new Date(task.due + "T12:00:00");
+  endDate.setDate(endDate.getDate() + 1);
+  let end = endDate.toISOString().split("T")[0].replaceAll("-", "");
 
-  if (toggleButton || deleteButton) {
-    saveTasks();
-    render();
-  }
-});
+  let details = "Subject: " + task.subject +
+    "\nType: " + task.type +
+    "\nPriority: " + task.priority +
+    "\n" + task.notes;
 
-$("search").addEventListener("input", render);
-$("filter").addEventListener("change", render);
+  let link = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+  link += "&text=" + encodeURIComponent(task.title);
+  link += "&dates=" + date + "/" + end;
+  link += "&details=" + encodeURIComponent(details);
 
-$("due").value = dateAfter(3);
-render();
+  return link;
+}
