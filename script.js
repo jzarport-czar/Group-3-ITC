@@ -86,7 +86,14 @@ function showTasks() {
           : ""}
       </div>
       ${task.notes ? `<p>${task.notes}</p>` : ""}
-      ${!task.done ? `<a class="calendar-btn" target="_blank" rel="noopener" href="${calendarLink(task)}">Add to Google Calendar</a>` : ""}
+      ${!task.done ? `
+        <div class="calendar-actions">
+          ${task.plannedDate
+            ? `<a class="calendar-btn" target="_blank" rel="noopener" href="${calendarLink(task, "planned")}">Add work-date reminder</a>`
+            : ""}
+          <a class="calendar-btn" target="_blank" rel="noopener" href="${calendarLink(task, "due")}">Add due-date reminder</a>
+        </div>
+      ` : ""}
     `;
 
     list.appendChild(card);
@@ -196,19 +203,24 @@ function deleteTask(id) {
 }
 
 // Make a Google Calendar event link
-function calendarLink(task) {
-  let date = task.due.replaceAll("-", "");
-  let endDate = new Date(task.due + "T12:00:00");
+function calendarLink(task, dateType) {
+  let eventDate = dateType === "planned" ? task.plannedDate : task.due;
+  let date = eventDate.replaceAll("-", "");
+  let endDate = new Date(eventDate + "T12:00:00");
   endDate.setDate(endDate.getDate() + 1);
   let end = endDate.toISOString().split("T")[0].replaceAll("-", "");
 
-  let details = "Subject: " + task.subject +
+  let reminderType = dateType === "planned" ? "Planned work date" : "Due date";
+  let details = "Reminder: " + reminderType +
+    "\nSubject: " + task.subject +
     "\nType: " + task.type +
     "\nPriority: " + task.priority +
+    "\nDue date: " + task.due +
+    (task.plannedDate ? "\nPlanned work date: " + task.plannedDate : "") +
     "\n" + task.notes;
 
   let link = "https://calendar.google.com/calendar/render?action=TEMPLATE";
-  link += "&text=" + encodeURIComponent(task.title);
+  link += "&text=" + encodeURIComponent(task.title + " - " + reminderType);
   link += "&dates=" + date + "/" + end;
   link += "&details=" + encodeURIComponent(details);
 

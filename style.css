@@ -291,6 +291,12 @@ textarea {
   text-decoration: none;
 }
 
+.calendar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .empty {
   padding: 28px 12px;
   color: var(--muted);
@@ -403,6 +409,11 @@ footer {
   font: inherit;
   font-size: 12px;
   cursor: pointer;
+}
+
+.calendar-home-btn {
+  display: inline-block;
+  text-decoration: none;
 }
 
 .theme-btn:hover {
